@@ -40,8 +40,9 @@ public class TdxImporter {
 	private String folderPath;
 	private Map<String, ExistsDailyBound> boundMap = new TreeMap<>();
 
-	public static void main(String[] args) throws SQLException, ClassNotFoundException, FileNotFoundException, IOException {
-		TdxImporter importer = new TdxImporter("/Users/wanglongjiang/Desktop/export");
+	public static void main(String[] args)
+			throws SQLException, ClassNotFoundException, FileNotFoundException, IOException {
+		TdxImporter importer = new TdxImporter("D:/new_tdx/T0002/export");
 		importer.startImport();
 	}
 
@@ -49,13 +50,14 @@ public class TdxImporter {
 		this.folderPath = folderPath;
 	}
 
-	private void startImport()
-			throws SQLException, IOException, UnsupportedEncodingException, FileNotFoundException, ClassNotFoundException {
+	private void startImport() throws SQLException, IOException, UnsupportedEncodingException, FileNotFoundException,
+			ClassNotFoundException {
 		try (Connection conn = ConnectionManager.getConnection();
 				PreparedStatement queryStock = conn.prepareStatement("select 1 from stock where stock_id=?");
-				PreparedStatement insertStock = conn
-						.prepareStatement("insert into stock(stock_id,stock_name,stock_code,exchange) values(?,?,?,?) ");
-				PreparedStatement updateStock = conn.prepareStatement("update stock set stock_name=? where stock_id=? ");
+				PreparedStatement insertStock = conn.prepareStatement(
+						"insert into stock(stock_id,stock_name,stock_code,exchange) values(?,?,?,?) ");
+				PreparedStatement updateStock = conn
+						.prepareStatement("update stock set stock_name=? where stock_id=? ");
 				PreparedStatement insertDaily = conn.prepareStatement(
 						"insert into stock_daily(stock_id,stock_date,opening,closing,highest,lowest,volume,turnover) values(?,?,?,?,?,?,?,?)");
 				PreparedStatement queryDailyBound = conn.prepareStatement(
@@ -186,13 +188,21 @@ public class TdxImporter {
 		if (!stock.getCode().equals(code2)) {
 			throw new BaicException("文件内部的股票代码与文件名中的股票代码不一致。内部股票代码：" + code2 + " 文件名：" + file.getName());
 		}
-		if (!"日线".equals(stockInfo[2])) {
+		if (!"日线".equals(stockInfo[stockInfo.length - 2])) {
 			throw new BaicException("不是日线数据。内部股票代码：" + code2 + " 文件名：" + file.getName());
 		}
-		if (!"前复权".equals(stockInfo[3])) {
+		if (!"前复权".equals(stockInfo[stockInfo.length - 1])) {
 			throw new BaicException("不是前复权数据。内部股票代码：" + code2 + " 文件名：" + file.getName());
 		}
-		stock.setName(stockInfo[1]);
+		if (stockInfo.length > 4) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 1; i < stockInfo.length - 2; i++) {
+				sb.append(stockInfo[i]);
+			}
+			stock.setName(sb.toString());
+		} else {
+			stock.setName(stockInfo[1]);
+		}
 		queryStock.setString(1, stock.getId());
 		ResultSet rs = queryStock.executeQuery();
 		if (!rs.next()) {
