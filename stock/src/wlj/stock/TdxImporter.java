@@ -33,7 +33,7 @@ import com.baic.bcl.util.NumberUtils;
  */
 public class TdxImporter {
 
-	private static final Pattern tdxFileName = Pattern.compile("^(?<id>(?<exchange>[A-Z]{2})#(?<code>\\d{6}))\\.txt$");
+	private static final Pattern tdxFileName = Pattern.compile("^(?<id>(?<exchange>[A-Z0-9]{2})#(?<code>[^.]{2,6}))\\.txt$");
 	private static final Pattern tdxFileData = Pattern.compile(
 			"(?<date>[^,]{10}),(?<opening>[^,]+),(?<highest>[^,]+),(?<lowest>[^,]+),(?<closing>[^,]+),(?<volume>[^,]+),(?<turnover>[^,]+)");
 
