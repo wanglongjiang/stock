@@ -22,7 +22,7 @@ public class MaCompute {
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
 		try (Connection conn = ConnectionManager.getConnection();
 				PreparedStatement queryStockDaily = conn.prepareStatement(
-						"select stock_id,stock_date,closing from stock_daily order by stock_id,stock_date ");
+						"select stock_id,stock_date,closing from stock_daily where ma5 is null order by stock_id,stock_date ");
 				PreparedStatement countStockDaily = conn
 						.prepareStatement("select count(*) from stock");
 				PreparedStatement updateStockDaily = conn.prepareStatement(

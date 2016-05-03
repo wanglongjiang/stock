@@ -21,8 +21,8 @@ import wlj.stock.Transaction;
 public class SingleMaSelector {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
-		String stockId = "SZ#399395";
-		String maType = "ma20";
+		String stockId = "29#CL9";
+		String maType = "ma30";
 		String separtor = "\t";
 		try (Connection conn = ConnectionManager.getConnection();) {
 			List<Transaction> transactions = new MaSelector(maType, conn).query(stockId);
@@ -31,20 +31,23 @@ public class SingleMaSelector {
 				return;
 			}
 			BigDecimal firstBuyingPrice = transactions.get(0).getBuyingPrice();
-			System.out.println("买入日期\t卖出日期\t买入价\t卖出价\t利润");
+			System.out.println("买入日期\t卖出日期\t买入价\t卖出价\t利润\t利润百分比");
 			BigDecimal totalProfit = transactions.stream().map(t -> {
 				StringBuilder sb = new StringBuilder();
 				sb.append(DateUtils.toStr(t.getBuyingDate())).append(separtor);
 				sb.append(DateUtils.toStr(t.getSellingDate())).append(separtor);
 				sb.append(t.getBuyingPrice()).append(separtor);
 				sb.append(t.getSellingPrice()).append(separtor);
-				sb.append(t.getProfit());
+				sb.append(t.getProfit()).append(separtor);
+				sb.append(t.getProfit().multiply(BigDecimal.valueOf(100)).divide(t.getBuyingPrice(), 2,
+						RoundingMode.HALF_UP)).append("%").append(separtor);
 				System.out.println(sb);
 				return t.getProfit();
 			}).reduce((a, b) -> {
 				return a.add(b);
 			}).get();
-			System.out.println("总利润：" + totalProfit + ",倍数：" + totalProfit.divide(firstBuyingPrice, RoundingMode.HALF_UP));
+			System.out.println(
+					"总利润：" + totalProfit + ",倍数：" + totalProfit.divide(firstBuyingPrice, RoundingMode.HALF_UP));
 		}
 	}
 }

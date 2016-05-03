@@ -21,7 +21,7 @@ import com.baic.bcl.util.NumberUtils;
 public class MulitMaSelector {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
-		String stockIdLike = "SZ#159902%";
+		String stockIdLike = "29#%";
 		String maType = "ma20";
 		String separtor = "\t";
 		try (Connection conn = ConnectionManager.getConnection();
