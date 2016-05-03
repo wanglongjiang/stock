@@ -40,9 +40,12 @@ public class TdxImporter {
 	private String folderPath;
 	private Map<String, ExistsDailyBound> boundMap = new TreeMap<>();
 
-	public static void main(String[] args)
-			throws SQLException, ClassNotFoundException, FileNotFoundException, IOException {
-		TdxImporter importer = new TdxImporter("D:/new_tdx/T0002/export");
+	public static void main(String[] args) throws SQLException, ClassNotFoundException, FileNotFoundException, IOException {
+		if (args == null || args.length == 0) {
+			System.err.println("usage:java TdxImporter path/to/file ");
+			return;
+		}
+		TdxImporter importer = new TdxImporter(args[0]);
 		importer.startImport();
 	}
 
@@ -50,14 +53,13 @@ public class TdxImporter {
 		this.folderPath = folderPath;
 	}
 
-	private void startImport() throws SQLException, IOException, UnsupportedEncodingException, FileNotFoundException,
-			ClassNotFoundException {
+	private void startImport()
+			throws SQLException, IOException, UnsupportedEncodingException, FileNotFoundException, ClassNotFoundException {
 		try (Connection conn = ConnectionManager.getConnection();
 				PreparedStatement queryStock = conn.prepareStatement("select 1 from stock where stock_id=?");
-				PreparedStatement insertStock = conn.prepareStatement(
-						"insert into stock(stock_id,stock_name,stock_code,exchange) values(?,?,?,?) ");
-				PreparedStatement updateStock = conn
-						.prepareStatement("update stock set stock_name=? where stock_id=? ");
+				PreparedStatement insertStock = conn
+						.prepareStatement("insert into stock(stock_id,stock_name,stock_code,exchange) values(?,?,?,?) ");
+				PreparedStatement updateStock = conn.prepareStatement("update stock set stock_name=? where stock_id=? ");
 				PreparedStatement insertDaily = conn.prepareStatement(
 						"insert into stock_daily(stock_id,stock_date,opening,closing,highest,lowest,volume,turnover) values(?,?,?,?,?,?,?,?)");
 				PreparedStatement queryDailyBound = conn.prepareStatement(

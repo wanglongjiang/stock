@@ -5,11 +5,40 @@ import java.util.Date;
 
 public class Transaction {
 
+	/**
+	 * 买入价
+	 */
 	private BigDecimal buyingPrice;
+
+	/**
+	 * 买入日期
+	 */
 	private Date buyingDate;
+
+	/**
+	 * 卖出价
+	 */
 	private BigDecimal sellingPrice;
+
+	/**
+	 * 卖出日期
+	 */
 	private Date sellingDate;
+
+	/**
+	 * 利润
+	 */
 	private BigDecimal profit;
+
+	/**
+	 * 最高价
+	 */
+	private BigDecimal highestPrice;
+
+	/**
+	 * 最低价
+	 */
+	private BigDecimal lowestPrice;
 
 	/**
 	 * @return the buyingPrice
@@ -86,4 +115,31 @@ public class Transaction {
 		this.profit = profit;
 	}
 
+	/**
+	 * @return the highestPrice
+	 */
+	public BigDecimal getHighestPrice() {
+		return highestPrice;
+	}
+
+	/**
+	 * @param highestPrice the highestPrice to set
+	 */
+	public void setHighestPrice(BigDecimal highestPrice) {
+		this.highestPrice = highestPrice;
+	}
+
+	/**
+	 * @return the lowestPrice
+	 */
+	public BigDecimal getLowestPrice() {
+		return lowestPrice;
+	}
+
+	/**
+	 * @param lowestPrice the lowestPrice to set
+	 */
+	public void setLowestPrice(BigDecimal lowestPrice) {
+		this.lowestPrice = lowestPrice;
+	}
 }

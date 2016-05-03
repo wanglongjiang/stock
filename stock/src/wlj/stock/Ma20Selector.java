@@ -1,5 +1,6 @@
 package wlj.stock;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -15,7 +16,7 @@ import com.baic.bcl.util.DateUtils;
  */
 public class Ma20Selector {
 
-	public static void main(String[] args) throws ClassNotFoundException, SQLException {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
 		String stockId = "SZ#159901";
 		String maType = "ma20";
 		String separtor = "\t";

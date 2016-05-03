@@ -40,7 +40,7 @@ public class MaSelector {
 	 */
 	public List<Transaction> query(String stockId) throws SQLException {
 		try (PreparedStatement queryStock = conn.prepareStatement("select closing," + maType
-				+ ",stock_date from stock_daily where stock_id=? order by stock_id,stock_date");) {
+				+ ",stock_date,highest,lowest from stock_daily where stock_id=? order by stock_id,stock_date");) {
 			queryStock.setString(1, stockId);
 			ResultSet rs = queryStock.executeQuery();
 			boolean purchased = false;
@@ -49,10 +49,14 @@ public class MaSelector {
 			BigDecimal closing = null;
 			BigDecimal ma = null;
 			Date stockDate = null;
+			BigDecimal highest = null;
+			BigDecimal lowest = null;
 			while (rs.next()) {
 				closing = rs.getBigDecimal(1);
 				ma = rs.getBigDecimal(2);
 				stockDate = rs.getDate(3);
+				highest = rs.getBigDecimal(4);
+				lowest = rs.getBigDecimal(5);
 				// 未购买
 				if (!purchased) {
 					// 收盘价高于X日线，买入
@@ -61,11 +65,22 @@ public class MaSelector {
 						transactions.add(transaction);
 						transaction.setBuyingDate(stockDate);
 						transaction.setBuyingPrice(closing);
+
+						transaction.setHighestPrice(closing);
+						transaction.setLowestPrice(closing);
 						purchased = true;
 					}
 				}
 				// 已购买
 				else {
+
+					// 设置最高价、最低价
+					if (transaction.getHighestPrice().compareTo(highest) < 0) {
+						transaction.setHighestPrice(highest);
+					}
+					if (transaction.getLowestPrice().compareTo(lowest) > 0) {
+						transaction.setLowestPrice(lowest);
+					}
 					// 收盘价低于X日线，卖出
 					if (closing.compareTo(ma) < 0) {
 						transaction.setSellingDate(stockDate);

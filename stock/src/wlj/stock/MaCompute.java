@@ -1,5 +1,6 @@
 package wlj.stock;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
@@ -19,12 +20,11 @@ import com.baic.bcl.util.NumberUtils;
  *
  */
 public class MaCompute {
-	public static void main(String[] args) throws ClassNotFoundException, SQLException {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
 		try (Connection conn = ConnectionManager.getConnection();
 				PreparedStatement queryStockDaily = conn.prepareStatement(
 						"select stock_id,stock_date,closing from stock_daily where ma5 is null order by stock_id,stock_date ");
-				PreparedStatement countStockDaily = conn
-						.prepareStatement("select count(*) from stock");
+				PreparedStatement countStockDaily = conn.prepareStatement("select count(*) from stock");
 				PreparedStatement updateStockDaily = conn.prepareStatement(
 						"update stock_daily set ma5=?,ma10=?,ma20=?,ma30=?,ma60=?,ma120=? where stock_id=? and stock_date=? ");) {
 			conn.setAutoCommit(true);
