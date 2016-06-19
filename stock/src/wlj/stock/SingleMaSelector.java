@@ -23,8 +23,8 @@ import wlj.stock.Transaction;
 public class SingleMaSelector {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
-		String stockId = "29#CL9";
-		String maType = "ma20";
+		String stockId = "SZ#399395";
+		String maType = "ma5";
 		String separtor = "\t";
 		try (Connection conn = ConnectionManager.getConnection();) {
 			List<Transaction> transactions = new MaSelector(maType, conn).query(stockId);

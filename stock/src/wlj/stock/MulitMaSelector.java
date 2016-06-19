@@ -22,8 +22,8 @@ import com.baic.bcl.util.NumberUtils;
 public class MulitMaSelector {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
-		String stockIdLike = "29#%";
-		String maType = "ma20";
+		String stockIdLike = "SH#600887%";
+		String maType = "ma5";
 		String separtor = "\t";
 		try (Connection conn = ConnectionManager.getConnection();
 				PreparedStatement queryStock = conn

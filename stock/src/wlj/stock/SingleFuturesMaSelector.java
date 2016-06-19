@@ -24,9 +24,9 @@ import wlj.stock.Transaction;
 public class SingleFuturesMaSelector {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
-		String stockId = "29#CL9";
+		String stockId = "SH#600887";
 		int lever = 20; // 杠杆倍数
-		String maType = "ma20";
+		String maType = "ma5";
 		String separtor = "\t";
 		BigDecimal lev = BigDecimal.valueOf(lever);
 		ArrayList<Date> loseDate = new ArrayList<>();
