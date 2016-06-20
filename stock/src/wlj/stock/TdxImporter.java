@@ -33,14 +33,16 @@ import com.baic.bcl.util.NumberUtils;
  */
 public class TdxImporter {
 
-	private static final Pattern tdxFileName = Pattern.compile("^(?<id>(?<exchange>[A-Z0-9]{2})#(?<code>[^.]{2,6}))\\.txt$");
+	private static final Pattern tdxFileName = Pattern
+			.compile("^(?<id>(?<exchange>[A-Z0-9]{2})#(?<code>[^.]{2,6}))\\.txt$");
 	private static final Pattern tdxFileData = Pattern.compile(
 			"(?<date>[^,]{10}),(?<opening>[^,]+),(?<highest>[^,]+),(?<lowest>[^,]+),(?<closing>[^,]+),(?<volume>[^,]+),(?<turnover>[^,]+)");
 
 	private String folderPath;
 	private Map<String, ExistsDailyBound> boundMap = new TreeMap<>();
 
-	public static void main(String[] args) throws SQLException, ClassNotFoundException, FileNotFoundException, IOException {
+	public static void main(String[] args)
+			throws SQLException, ClassNotFoundException, FileNotFoundException, IOException {
 		if (args == null || args.length == 0) {
 			System.err.println("usage:java TdxImporter path/to/file ");
 			return;
@@ -53,13 +55,14 @@ public class TdxImporter {
 		this.folderPath = folderPath;
 	}
 
-	private void startImport()
-			throws SQLException, IOException, UnsupportedEncodingException, FileNotFoundException, ClassNotFoundException {
+	private void startImport() throws SQLException, IOException, UnsupportedEncodingException, FileNotFoundException,
+			ClassNotFoundException {
 		try (Connection conn = ConnectionManager.getConnection();
 				PreparedStatement queryStock = conn.prepareStatement("select 1 from stock where stock_id=?");
-				PreparedStatement insertStock = conn
-						.prepareStatement("insert into stock(stock_id,stock_name,stock_code,exchange) values(?,?,?,?) ");
-				PreparedStatement updateStock = conn.prepareStatement("update stock set stock_name=? where stock_id=? ");
+				PreparedStatement insertStock = conn.prepareStatement(
+						"insert into stock(stock_id,stock_name,stock_code,exchange) values(?,?,?,?) ");
+				PreparedStatement updateStock = conn
+						.prepareStatement("update stock set stock_name=? where stock_id=? ");
 				PreparedStatement insertDaily = conn.prepareStatement(
 						"insert into stock_daily(stock_id,stock_date,opening,closing,highest,lowest,volume,turnover) values(?,?,?,?,?,?,?,?)");
 				PreparedStatement queryDailyBound = conn.prepareStatement(
@@ -79,7 +82,7 @@ public class TdxImporter {
 
 	private void importFiles(PreparedStatement queryStock, PreparedStatement insertStock, PreparedStatement updateStock,
 			PreparedStatement insertDaily, Collection<File> files)
-					throws IOException, SQLException, UnsupportedEncodingException, FileNotFoundException {
+			throws IOException, SQLException, UnsupportedEncodingException, FileNotFoundException {
 		float i = 0;
 		for (File file : files) {
 			i += 1;
@@ -95,19 +98,36 @@ public class TdxImporter {
 				try (LineNumberReader reader = new LineNumberReader(
 						new InputStreamReader(new FileInputStream(file), "GBK"))) {
 					String line = null;
+					DataType dataType = null;
 					for (int lineNum = 0; (line = reader.readLine()) != null; lineNum++) {
 						if (lineNum == 0) {
-							saveOrUpdateStock(queryStock, updateStock, insertStock, file, stock, line);
+							dataType = saveOrUpdateStock(queryStock, updateStock, insertStock, file, stock, line);
 						} else {
-							StockDaily stockDaily = parseDailyData(stock, line);
-							if (stockDaily != null) {
-								saveStockDaily(insertDaily, stockDaily);
+							if (dataType == DataType.daily) {
+								processDaily(insertDaily, stock, line);
+							} else if (dataType == DataType.minute1) {
+
+							} else if (dataType == DataType.minute5) {
+
 							}
 						}
 					}
 					// conn.commit();
 				}
 			}
+		}
+	}
+
+	/**
+	 * @param insertDaily
+	 * @param stock
+	 * @param line
+	 * @throws SQLException
+	 */
+	private void processDaily(PreparedStatement insertDaily, Stock stock, String line) throws SQLException {
+		StockDaily stockDaily = parseDailyData(stock, line);
+		if (stockDaily != null) {
+			saveStockDaily(insertDaily, stockDaily);
 		}
 	}
 
@@ -183,15 +203,22 @@ public class TdxImporter {
 	 * @param line
 	 * @throws SQLException
 	 */
-	private void saveOrUpdateStock(PreparedStatement queryStock, PreparedStatement updateStock,
+	private DataType saveOrUpdateStock(PreparedStatement queryStock, PreparedStatement updateStock,
 			PreparedStatement insertStock, File file, Stock stock, String line) throws SQLException {
+		DataType type = null;
 		String[] stockInfo = line.split("\\s");
 		String code2 = stockInfo[0];
 		if (!stock.getCode().equals(code2)) {
 			throw new BaicException("文件内部的股票代码与文件名中的股票代码不一致。内部股票代码：" + code2 + " 文件名：" + file.getName());
 		}
-		if (!"日线".equals(stockInfo[stockInfo.length - 2])) {
-			throw new BaicException("不是日线数据。内部股票代码：" + code2 + " 文件名：" + file.getName());
+		if ("日线".equals(stockInfo[stockInfo.length - 2])) {
+			type = DataType.daily;
+		} else if ("1分钟线".equals(stockInfo[stockInfo.length - 2])) {
+			type = DataType.minute1;
+		} else if ("5分钟线".equals(stockInfo[stockInfo.length - 2])) {
+			type = DataType.minute5;
+		} else {
+			throw new BaicException("不是日线/1分钟线/5分钟线数据。内部股票代码：" + code2 + " 文件名：" + file.getName());
 		}
 		if (!"前复权".equals(stockInfo[stockInfo.length - 1])) {
 			throw new BaicException("不是前复权数据。内部股票代码：" + code2 + " 文件名：" + file.getName());
@@ -218,5 +245,6 @@ public class TdxImporter {
 			updateStock.setString(2, stock.getId());
 			updateStock.executeUpdate();
 		}
+		return type;
 	}
 }
